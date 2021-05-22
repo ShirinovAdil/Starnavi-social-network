@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
 
     'rest_framework',
-
+    'django_filters',
 
     'social_network',
 
@@ -132,3 +132,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'social_network.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
