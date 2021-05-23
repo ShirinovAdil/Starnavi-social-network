@@ -8,6 +8,7 @@ class User(AbstractUser):
     """
     name = models.CharField(max_length=255)
     email = models.CharField(max_length=255, unique=True)
+    last_activity = models.DateTimeField(auto_now_add=True)
 
 
 class Post(models.Model):
@@ -29,6 +30,9 @@ class Post(models.Model):
 
 
 class PostLike(models.Model):
+    """
+    A model to represent a single like
+    """
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_likes')
     liker = models.ForeignKey(User, on_delete=models.CASCADE)
     liked_at = models.DateTimeField(auto_now_add=True)

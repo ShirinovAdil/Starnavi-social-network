@@ -1,29 +1,35 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import AuthenticationFailed
 
 from social_network.serializers import *
 from social_network.models import *
-from social_network.filters import LikeAnalyticsFilter
-
-import jwt
-import datetime
 
 
 class RegisterApiView(APIView):
+    """
+    Accepts name, username, email, password, password2
+    """
+    permission_classes = [AllowAny,]
+
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        else:
-            return Response(serializer.errors)
+
+        return Response(serializer.errors)
 
 
 class LoginApiView(APIView):
+    """
+    Login via username and password
+    """
+    permission_classes = [AllowAny,]
+
     def post(self, request):
         username = request.data['username']
         password = request.data['password']
@@ -41,9 +47,15 @@ class LoginApiView(APIView):
 
 
 class PostViewSet(viewsets.ModelViewSet):
+    """
+     Post related endpoints.
+     like_post to like the post
+     unlike_post to unlike the post
+    """
+    permission_classes = [IsAuthenticated,]
+
     serializer_class = PostSerializer
     queryset = Post.objects.all()
-    # filterset_class = LikeAnalyticsFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -71,9 +83,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
 class PostLikesAnalyticsApiView(APIView):
     """
-    An api view that return likes analytics about a post
+    An api view that return likes analytics about posts
     """
-    serializer_class = PostLikeSerializer
+
+    permission_classes = [IsAuthenticated,]
 
     def get(self, request, *args, **kwargs):
         likes_analytics = PostLike.objects.filter(liked_at__range=[kwargs['date_from'], kwargs['date_to']])
@@ -81,3 +94,27 @@ class PostLikesAnalyticsApiView(APIView):
             return Response({'Likes': len(likes_analytics)})
         else:
             return Response({'message': "No likes"})
+
+
+class UserAnalyticsApiView(APIView):
+    """
+    An api view that return users analytics
+    """
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request, *args, **kwargs):
+        users = User.objects.all()
+        serializer = UserActivitySerializer(users, many=True)
+        return Response(serializer.data)
+
+
+class UsersListApiView(APIView):
+    """
+    An api view that returns users list
+    """
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request, *args, **kwargs):
+        users = User.objects.all()
+        serializer = UserViewSerializer(users, many=True)
+        return Response(serializer.data)

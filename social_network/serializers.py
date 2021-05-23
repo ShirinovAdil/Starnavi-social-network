@@ -25,20 +25,31 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
-
         return attrs
 
     def create(self, validated_data):
+        password = validated_data['password']
         user = User.objects.create(
             username=validated_data['username'],
             name=validated_data['name'],
             email=validated_data['email']
         )
 
-        user.set_password(validated_data['password'])
-        user.save()
+        if password is not None:
+            user.set_password(password)
+            user.save()
 
         return user
+
+
+class UserViewSerializer(serializers.ModelSerializer):
+    """
+    Serializer to return user view
+    """
+    class Meta:
+        model = User
+        fields = ('username', 'name', 'email')
+        read_only_fields = ('date_joined',)
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -47,6 +58,7 @@ class PostSerializer(serializers.ModelSerializer):
     """
     author = serializers.StringRelatedField(read_only=True)
     likes = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
     class Meta:
         model = Post
@@ -64,3 +76,15 @@ class PostLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostLike
         fields = ['post', 'liker', 'liked_at']
+
+
+class UserActivitySerializer(serializers.ModelSerializer):
+    """
+    Users activity serializer
+    """
+    last_login = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    last_activity = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+
+    class Meta:
+        model = User
+        fields = ['username', 'last_login', 'last_activity']
