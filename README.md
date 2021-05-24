@@ -55,3 +55,16 @@ non-specified requirements (including chosen tech, third party apps, etc), howev
 ● Result should be sent by pro viding a Git url. This is a mandatory requirement.
 
 
+
+
+## Instalation
+
+● Create a python virtual environment and install dependencies from requirements.txt
+
+● Migrate the database via `python manage.py migrate`
+
+●  Run he server via `python manage.py runserver`
+
+●  Done. Use the API
+
+
