@@ -8,6 +8,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from social_network.serializers import *
 from social_network.models import *
 
+from .permissions import IsAuthorOrReadOnly
+
 
 class RegisterApiView(APIView):
     """
@@ -52,7 +54,7 @@ class PostViewSet(viewsets.ModelViewSet):
      like_post to like the post
      unlike_post to unlike the post
     """
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly,]
 
     serializer_class = PostSerializer
     queryset = Post.objects.all()
